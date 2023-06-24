@@ -6,7 +6,7 @@ import sys
 
 
 class FPL:
-    URL = 'https://fantasy.premierleague.com/api/bootstrap-dstatic/'
+    URL = 'https://fantasy.premierleague.com/api/bootstrap-static/'
 
     def __init__(self):
         self.response_raw = rq.get(FPL.URL)
