@@ -6,7 +6,7 @@ import sys
 
 
 class FPL:
-    URL = 'https://fantasy.premierleague.com/api/bootstrap-static/'
+    URL = 'https://fantasy.premierleague.com/api/bootstrap-dstatic/'
 
     def __init__(self):
         self.response_raw = rq.get(FPL.URL)
@@ -17,7 +17,7 @@ class FPL:
         self.email = os.getenv('EMAIL')
 
         if self.response_raw.status_code != 200:
-            self.they_blocked_my_ip()
+            self.send_email('error', str(self.response_raw.status_code) + ";" + self.response_raw.text)
             self.shit_hit_the_fan = True
             return
 
@@ -25,13 +25,13 @@ class FPL:
         self.response = self.response_raw.json()
         self.tot_players = int(self.response['total_players'])
 
-    def send_email(self, ping_mode: bool = False, blocked: bool = False):
-        if blocked:
-            message = 'Subject: {}\n\n{}'.format("BLOCKED BY FPL", "My IP just got blocked")
-        elif ping_mode:
+    def send_email(self, setting: str = 'normal', error_message: str = ''):
+        if setting == 'normal':
+            message = 'Subject: {}\n\n{}'.format("FPL REGISTRATION IS OPEN", "GO GET THEM")
+        elif setting == 'ping':
             message = 'Subject: {}\n\n{}'.format("PING FPL", "Script is working")
         else:
-            message = 'Subject: {}\n\n{}'.format("FPL REGISTRATION IS OPEN", "GO GET THEM")
+            message = 'Subject: {}\n\n{}'.format("ERROR FPL", error_message)
 
         try:
             s = smtplib.SMTP('smtp.gmail.com', 587)
@@ -55,11 +55,7 @@ class FPL:
                         f.write("EMAIL_SENT=1")
 
     def ping(self):
-        if self.send_email(True):
-            pass
-
-    def they_blocked_my_ip(self):
-        if self.send_email(True, True):
+        if self.send_email('ping'):
             pass
 
 
