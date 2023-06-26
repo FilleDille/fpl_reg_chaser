@@ -48,7 +48,7 @@ class FPL:
             return False
 
     def run(self):
-        if self.tot_players < 1_000_000:
+        if 0 < self.tot_players < 1_000_000:
             if self.email_sent is None:
                 if self.send_email():
                     with open(".env", "a") as f:
