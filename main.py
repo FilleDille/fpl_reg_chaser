@@ -1,6 +1,7 @@
 import requests as rq
 from dotenv import load_dotenv, set_key
 from pathlib import Path
+import newspaper
 import os
 import smtplib
 import sys
@@ -59,10 +60,28 @@ class FPL:
         return True
 
     def run(self):
-        if 0 < self.tot_players < 15_000_000:
-            if self.email_sent == 'false':
+        self.check_api()
+        self.check_news()
+
+    def check_api(self):
+        if self.email_sent == 'false':
+            if 0 < self.tot_players < 1_000_000:
                 if self.send_email():
                     set_key(dotenv_path=self.path, key_to_set='EMAIL_SENT', value_to_set='true')
+    
+    def check_news(self):
+        if self.email_sent == 'false':
+            site = newspaper.build('https://www.premierleague.com/news')
+            site_urls = site.article_urls()
+
+            for article_url in site_urls:
+                article = newspaper.Article(article_url)
+                article.download()
+                article.parse()
+                article_lower = article.text.lower()
+                if '2024/25' in article_lower and 'is live' in article_lower:
+                    if self.send_email():
+                        set_key(dotenv_path=self.path, key_to_set='EMAIL_SENT', value_to_set='true')
 
     def ping(self):
         if self.send_email('ping'):
